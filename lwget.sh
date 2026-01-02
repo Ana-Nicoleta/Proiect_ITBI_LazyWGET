@@ -1,9 +1,9 @@
-!/bin/bash
+#!/bin/bash
 
-urmeazaVerif="/home/urmeazaVerif"
-verificate="/home/verificate"
+urmeazaVerif="/home/$USER/urmeazaVerif"
+verificate="/home/$USER/verificate"
 fisierHTML=$1
-cnt=1
+
 
 if ! [ -d "$urmeazaVerif" ] && ! [ -d "$verificate" ]; then
 	mkdir "$urmeazaVerif"
@@ -16,14 +16,22 @@ if [ -z "$(ls "$urmeazaVerif")" ]; then
 			link=$(echo "$linie" | awk -F'"' '{print $2}')
 			if [ ! -z "$link" ] && [ "${linie:0:7}" == "<a href" ];then
 				echo $link
-				wget -q -O ${urmeazaVerif}/link${cnt} ${link}
+				wget -q -O $urmeazaVerif/$link $link
 				echo "done"
-				((cnt++))
 			fi
 		done 
 	else 
-		echo "Toate resursele au fost extrase, se gasesc la ${verificate} !"
+		echo "Toate resursele au fost extrase, se gasesc la $verificate !"
 	fi
 else
-	echo "" #cazul in care parsam promisiunile si creem altele
+	echo "$(ls -1 "$urmeazaVerif")" | while read link_neverificat;do
+		cat $urmeazaVerif/$link_neverificat | while read linie;do
+			link=$(echo "$linie" | awk -F'"' '{print $2}')
+				if [ ! -z "$link" ]  && [ "${linie:0:7}" == "<a href" ];then
+					echo $link
+					wget -q -O $urmeazaVerif/$link $link
+					echo "done"
+				fi
+		done
+	done
 fi
